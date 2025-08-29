@@ -1,0 +1,45 @@
+# Node.js dependencies
+/frontend/node_modules
+/frontend/dist
+
+# Python virtual environment
+/backend/venv
+/Model/venv
+
+# Python cache files
+/backend/__pycache__/
+*.pyc
+*.pyo
+*.pyd
+
+# Environment variables
+/backend/.env
+/frontend/.env
+
+# Logs
+*.log
+
+# Celery beat schedule files
+/backend/celerybeat-schedule.*
+
+# IDE-specific files
+.vscode/
+.idea/
+
+# OS-specific files
+.DS_Store
+Thumbs.db
+
+# Build artifacts
+/frontend/build
+/frontend/out
+
+# Tailwind CSS generated files
+/frontend/src/tailwind.css
+
+# TypeScript build artifacts
+/frontend/tsconfig.tsbuildinfo
+
+# Miscellaneous
+*.bak
+*.tmp
