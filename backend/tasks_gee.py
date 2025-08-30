@@ -18,7 +18,7 @@ try:
     ee.Initialize(project='isro-bah-2025') 
 except Exception:
     ee.Authenticate()
-    ee.Initialize(project='isrobah-2025')
+    ee.Initialize(project='isro-bah-2025')
 
 # --- The Main GEE Processing Task ---
 # The @celery_app.task decorator registers this function as a background task.

@@ -195,7 +195,7 @@ def analyze_flood_risk_gee(latitude: float, longitude: float):
             ee.Initialize(project='isro-bah-2025')
         except:
             ee.Authenticate()
-            ee.Initialize(project='isrobah-2025')
+            ee.Initialize(project='isro-bah-2025')
         
         print(f"🌍 Starting GEE flood analysis for coordinates: ({latitude}, {longitude})")
         
@@ -624,7 +624,7 @@ def analyze_flood_risk_gee_simple(latitude: float, longitude: float):
             ee.Initialize(project='isro-bah-2025')
         except:
             ee.Authenticate()
-            ee.Initialize(project='isrobah-2025')
+            ee.Initialize(project='isro-bah-2025')
         
         print(f"🌍 Starting simplified GEE analysis for ({latitude}, {longitude})")
         
