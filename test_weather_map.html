@@ -1,0 +1,146 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Weather Map Test</title>
+    <style>
+        body {
+            margin: 0;
+            padding: 20px;
+            font-family: Arial, sans-serif;
+            background: #f5f5f5;
+        }
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 8px;
+            padding: 20px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        .test-info {
+            background: #e3f2fd;
+            border: 1px solid #2196f3;
+            border-radius: 4px;
+            padding: 15px;
+            margin-bottom: 20px;
+        }
+        .map-container {
+            height: 500px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            overflow: hidden;
+        }
+        .instructions {
+            background: #fff3e0;
+            border: 1px solid #ff9800;
+            border-radius: 4px;
+            padding: 15px;
+            margin-top: 20px;
+        }
+        .code-block {
+            background: #f5f5f5;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            padding: 10px;
+            font-family: monospace;
+            margin: 10px 0;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🌤️ Weather Map Component Test</h1>
+        
+        <div class="test-info">
+            <h3>Test Status</h3>
+            <p>This page tests the WeatherMap component integration with OpenWeatherMap API.</p>
+            <p><strong>Note:</strong> You need to set up your OpenWeatherMap API key to see real data.</p>
+        </div>
+
+        <div class="map-container" id="weather-map">
+            <!-- Weather map will be rendered here -->
+            <div style="display: flex; align-items: center; justify-content: center; height: 100%; color: #666;">
+                <div style="text-align: center;">
+                    <h3>Weather Map Component</h3>
+                    <p>This would display the interactive weather map with:</p>
+                    <ul style="text-align: left; display: inline-block;">
+                        <li>🌡️ Temperature overlays</li>
+                        <li>💨 Wind direction indicators</li>
+                        <li>🌪️ Storm/cyclone tracking</li>
+                        <li>🎛️ Interactive controls</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+
+        <div class="instructions">
+            <h3>Setup Instructions</h3>
+            <ol>
+                <li><strong>Get OpenWeatherMap API Key:</strong>
+                    <ul>
+                        <li>Go to <a href="https://openweathermap.org/api" target="_blank">OpenWeatherMap API</a></li>
+                        <li>Sign up for a free account</li>
+                        <li>Get your API key from "My API Keys" section</li>
+                    </ul>
+                </li>
+                <li><strong>Configure Environment:</strong>
+                    <div class="code-block">
+                        # Create .env file in frontend directory<br>
+                        VITE_OPENWEATHER_API_KEY=your_api_key_here<br>
+                        VITE_API_URL=http://localhost:8000
+                    </div>
+                </li>
+                <li><strong>Start the Application:</strong>
+                    <div class="code-block">
+                        cd frontend<br>
+                        npm run dev
+                    </div>
+                </li>
+                <li><strong>View the Dashboard:</strong>
+                    <div class="code-block">
+                        Open http://localhost:5173 in your browser<br>
+                        Navigate to the Dashboard page<br>
+                        Look for "Live Weather & Storm Map" section
+                    </div>
+                </li>
+            </ol>
+        </div>
+
+        <div class="instructions">
+            <h3>Features Included</h3>
+            <ul>
+                <li><strong>Real-time Weather Data:</strong> Temperature, humidity, pressure for major Indian cities</li>
+                <li><strong>Wind Visualization:</strong> Speed, direction, and animated indicators</li>
+                <li><strong>Storm Tracking:</strong> Simulated cyclone data with path prediction</li>
+                <li><strong>Interactive Controls:</strong> Layer toggles, refresh button, legend</li>
+                <li><strong>Heat Map Overlay:</strong> Temperature visualization across regions</li>
+                <li><strong>Responsive Design:</strong> Works on desktop and mobile devices</li>
+            </ul>
+        </div>
+
+        <div class="instructions">
+            <h3>API Usage</h3>
+            <p><strong>Free Tier Limits:</strong> 1000 API calls per day</p>
+            <p><strong>Data Sources:</strong></p>
+            <ul>
+                <li>Current Weather: <code>https://api.openweathermap.org/data/2.5/weather</code></li>
+                <li>Weather Maps: <code>https://tile.openweathermap.org/map/temp_new/{z}/{x}/{y}.png</code></li>
+            </ul>
+        </div>
+    </div>
+
+    <script>
+        // Simple test to check if the environment is set up
+        console.log('Weather Map Test Page Loaded');
+        console.log('Check the browser console for any errors');
+        
+        // Check if we're in a development environment
+        if (typeof window !== 'undefined') {
+            console.log('Browser environment detected');
+            console.log('To see the actual weather map, run the React application');
+        }
+    </script>
+</body>
+</html>

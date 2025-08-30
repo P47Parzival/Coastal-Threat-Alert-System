@@ -1,9 +1,10 @@
 import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
-import { Plus, MapPin, Calendar, AlertTriangle, TrendingUp, Droplets, Navigation } from 'lucide-react';
+import { Plus, MapPin, Calendar, AlertTriangle, TrendingUp, Droplets, Navigation, Cloud } from 'lucide-react';
 import axios from 'axios';
 import { useAuth } from '../contexts/AuthContext';
 import toast from 'react-hot-toast';
+import WeatherMap from '../components/WeatherMap';
 
 interface AOI {
   _id: string;
@@ -377,6 +378,25 @@ export default function Dashboard() {
         ) : (
           <div className="text-gray-500 dark:text-gray-400 py-8 text-center">No AOIs found.</div>
         )}
+      </div>
+
+      {/* Weather Map */}
+      <div className="card bg-white dark:bg-[var(--color-card-dark)]">
+        <div className="flex items-center justify-between mb-4 border-b border-gray-200 dark:border-gray-800 pb-4">
+          <h2 className="text-xl font-semibold text-gray-900 dark:text-white flex items-center gap-2">
+            <Cloud className="w-6 h-6 text-blue-500" />
+            Live Weather & Storm Map
+          </h2>
+          <div className="text-sm text-gray-500 dark:text-gray-400">
+            Real-time data from OpenWeatherMap
+          </div>
+        </div>
+        <WeatherMap 
+          center={[19.0760, 72.8777]} 
+          zoom={6} 
+          height="500px" 
+          showControls={true}
+        />
       </div>
 
       {/* Flood Detection Results */}
