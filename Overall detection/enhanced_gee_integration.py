@@ -48,12 +48,37 @@ class EnhancedGEEManager:
                 "center": [72.825, 18.95],
                 "name": "Mumbai Coast"
             },
+            "mumbai": {
+                "geometry": ee.Geometry.Rectangle([72.7, 18.85, 72.95, 19.05]),
+                "center": [72.825, 18.95],
+                "name": "Mumbai Coast"
+            },
+            "kerala": {
+                "geometry": ee.Geometry.Rectangle([76.0, 9.5, 76.8, 11.0]),  # Smaller focused coastal region
+                "center": [76.4, 10.25],
+                "name": "Kerala Coast"
+            },
+            "kerala coast, india": {
+                "geometry": ee.Geometry.Rectangle([76.0, 9.5, 76.8, 11.0]),  # Smaller focused coastal region
+                "center": [76.4, 10.25],
+                "name": "Kerala Coast"
+            },
             "miami beach, florida, usa": {
                 "geometry": ee.Geometry.Rectangle([-80.25, 25.65, -80.05, 25.85]),
                 "center": [-80.15, 25.75],
                 "name": "Miami Beach"
             },
+            "miami": {
+                "geometry": ee.Geometry.Rectangle([-80.25, 25.65, -80.05, 25.85]),
+                "center": [-80.15, 25.75],
+                "name": "Miami Beach"
+            },
             "chennai coast, india": {
+                "geometry": ee.Geometry.Rectangle([80.15, 12.95, 80.35, 13.15]),
+                "center": [80.25, 13.05],
+                "name": "Chennai Coast"
+            },
+            "chennai": {
                 "geometry": ee.Geometry.Rectangle([80.15, 12.95, 80.35, 13.15]),
                 "center": [80.25, 13.05],
                 "name": "Chennai Coast"
@@ -67,6 +92,26 @@ class EnhancedGEEManager:
                 "geometry": ee.Geometry.Rectangle([72.8, 3.0, 74.2, 4.5]),
                 "center": [73.5, 3.75],
                 "name": "Maldives"
+            },
+            "maldives": {
+                "geometry": ee.Geometry.Rectangle([72.8, 3.0, 74.2, 4.5]),
+                "center": [73.5, 3.75],
+                "name": "Maldives"
+            },
+            "california coast, usa": {
+                "geometry": ee.Geometry.Rectangle([-122.8, 36.2, -121.8, 37.2]),
+                "center": [-122.3, 36.7],
+                "name": "California Coast"
+            },
+            "goa coast, india": {
+                "geometry": ee.Geometry.Rectangle([73.7, 15.0, 74.3, 15.8]),
+                "center": [74.0, 15.4],
+                "name": "Goa Coast"
+            },
+            "sydney harbour, australia": {
+                "geometry": ee.Geometry.Rectangle([151.0, -34.0, 151.5, -33.6]),
+                "center": [151.25, -33.8],
+                "name": "Sydney Harbour"
             }
         }
         
@@ -94,16 +139,40 @@ class EnhancedGEEManager:
                            .filterDate(start_date.strftime('%Y-%m-%d'), 
                                      end_date.strftime('%Y-%m-%d'))
                            .filterBounds(geometry)
-                           .filter(ee.Filter.lt('CLOUDY_PIXEL_PERCENTAGE', 20))
-                           .sort('system:time_start', False)
-                           .first())
+                           .filter(ee.Filter.lt('CLOUDY_PIXEL_PERCENTAGE', 50))  # Relaxed cloud filter
+                           .sort('system:time_start', False))
             
-            if s2_collection is None:
-                print("⚠️  No recent cloud-free imagery found")
+            # Get the size of the collection to check if we have any images
+            collection_size = s2_collection.size().getInfo()
+            
+            if collection_size == 0:
+                print("⚠️  No recent imagery found, trying wider search...")
+                # Try with more relaxed criteria
+                s2_collection = (ee.ImageCollection('COPERNICUS/S2_SR_HARMONIZED')
+                               .filterDate((end_date - timedelta(days=90)).strftime('%Y-%m-%d'), 
+                                         end_date.strftime('%Y-%m-%d'))
+                               .filterBounds(geometry)
+                               .filter(ee.Filter.lt('CLOUDY_PIXEL_PERCENTAGE', 80))
+                               .sort('system:time_start', False))
+                
+                collection_size = s2_collection.size().getInfo()
+                
+                if collection_size == 0:
+                    print("⚠️  No satellite imagery available for this location")
+                    return self._get_fallback_data(location)
+            
+            # Get the first (most recent) image
+            selected_image = s2_collection.first()
+            
+            # Check if image exists
+            try:
+                image_props = selected_image.getInfo()
+                if image_props is None:
+                    print("⚠️  No valid image data found")
+                    return self._get_fallback_data(location)
+            except Exception as e:
+                print(f"⚠️  Error getting image properties: {e}")
                 return self._get_fallback_data(location)
-            
-            # Get image properties
-            image_props = s2_collection.getInfo()
             image_date = datetime.fromtimestamp(
                 image_props['properties']['system:time_start'] / 1000
             ).strftime('%Y-%m-%d %H:%M:%S')
@@ -112,24 +181,14 @@ class EnhancedGEEManager:
             
             # Select bands for analysis (RGB + NIR for vegetation analysis)
             bands = ['B4', 'B3', 'B2', 'B8']  # Red, Green, Blue, NIR
-            selected_image = s2_collection.select(bands)
+            selected_bands = selected_image.select(bands)
             
-            # Get basic statistics
-            stats = selected_image.reduceRegion(
-                reducer=ee.Reducer.mean(),
-                geometry=geometry,
-                scale=10,
-                maxPixels=1e9
-            ).getInfo()
+            # Get basic statistics with progressive scaling
+            stats = self._safe_reduce_region(selected_bands, geometry, ee.Reducer.mean())
             
-            # Calculate NDVI (vegetation index)
-            ndvi = selected_image.normalizedDifference(['B8', 'B4'])
-            ndvi_stats = ndvi.reduceRegion(
-                reducer=ee.Reducer.mean(),
-                geometry=geometry,
-                scale=10,
-                maxPixels=1e9
-            ).getInfo()
+            # Calculate NDVI (vegetation index) with same safe approach
+            ndvi = selected_bands.normalizedDifference(['B8', 'B4'])
+            ndvi_stats = self._safe_reduce_region(ndvi, geometry, ee.Reducer.mean())
             
             avg_ndvi = ndvi_stats.get('nd', 0.5)
             
@@ -152,6 +211,41 @@ class EnhancedGEEManager:
         except Exception as e:
             print(f"❌ Error fetching satellite data: {e}")
             return self._get_fallback_data(location)
+    
+    def _safe_reduce_region(self, image, geometry, reducer):
+        """Safely reduce region with automatic scale adjustment"""
+        scales = [30, 100, 250, 500, 1000]  # Progressive scales from high to low resolution
+        
+        for scale in scales:
+            try:
+                result = image.reduceRegion(
+                    reducer=reducer,
+                    geometry=geometry,
+                    scale=scale,
+                    maxPixels=1e10,
+                    bestEffort=True
+                ).getInfo()
+                
+                print(f"✅ Successfully processed at {scale}m resolution")
+                return result
+                
+            except Exception as e:
+                if "Too many pixels" in str(e):
+                    print(f"⚠️  Scale {scale}m too high, trying lower resolution...")
+                    continue
+                else:
+                    print(f"❌ Error at scale {scale}m: {e}")
+                    break
+        
+        # If all scales fail, return default values
+        print("⚠️  All scales failed, using default values")
+        return {
+            'B4': 1200,  # Default red band value
+            'B3': 1100,  # Default green band value  
+            'B2': 1000,  # Default blue band value
+            'B8': 2500,  # Default NIR band value
+            'nd': 0.5    # Default NDVI value
+        }
     
     def _analyze_coastal_threats(self, band_stats: Dict, ndvi: float, cloud_cover: float) -> List[Dict]:
         """Analyze satellite data for coastal threats"""
