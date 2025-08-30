@@ -5,6 +5,7 @@
 # Python virtual environment
 /backend/venv
 /Model/venv
+/Overall detection/venv
 
 # Python cache files
 /backend/__pycache__/
@@ -15,6 +16,7 @@
 # Environment variables
 /backend/.env
 /frontend/.env
+/Overall detection/.env
 
 # Logs
 *.log

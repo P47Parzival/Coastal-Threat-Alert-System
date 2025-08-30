@@ -1,0 +1,6 @@
+{
+    "mode": "production",
+    "earthengine_available": true,
+    "use_real_data": true,
+    "reason": "Enhanced GEE integration enabled"
+}
