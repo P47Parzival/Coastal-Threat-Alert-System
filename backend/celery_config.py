@@ -14,7 +14,7 @@ celery_app = Celery(
     "tasks",
     broker=BROKER_URL,
     backend=RESULT_BACKEND,
-    include=["tasks_gee"]  # IMPORTANT: Tell Celery where to find tasks
+    include=["tasks_gee", "tasks_flood_monitoring"]  # IMPORTANT: Tell Celery where to find tasks
 )
 
 # --- Define the Scheduled Task ---
@@ -24,6 +24,14 @@ celery_app.conf.beat_schedule = {
         'task': 'tasks_gee.schedule_all_aoi_checks', # Points to the task function
         'schedule': crontab("*"),  
         # Use crontab(minute='*/30') for every 30 mins for testing
+    },
+    'monitor-flood-risk-every-3-hours': {
+        'task': 'tasks_flood_monitoring.monitor_all_users_for_flood',
+        'schedule': crontab(minute=0, hour='*/3'),  # Every 3 hours
+    },
+    'cleanup-old-flood-alerts-daily': {
+        'task': 'tasks_flood_monitoring.cleanup_old_flood_alerts',
+        'schedule': crontab(hour=2, minute=0),  # Daily at 2 AM
     },
 }
 

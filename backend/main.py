@@ -3,6 +3,7 @@ from fastapi.middleware.cors import CORSMiddleware
 from routes_auth import router as auth_router
 from routes_aoi import router as aoi_router
 from routes_shoreline import router as shoreline_router
+from routes_flood import router as flood_router
 
 import ee 
 ee.Initialize(project = 'isro-bah-2025')  # Initialize Earth Engine
@@ -20,6 +21,7 @@ app.add_middleware(
 app.include_router(auth_router)
 app.include_router(aoi_router)
 app.include_router(shoreline_router)
+app.include_router(flood_router)
 
 @app.get("/")
 async def root():

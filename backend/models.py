@@ -49,3 +49,25 @@ class ShorelineAnalysisRequest(BaseModel):
     confidenceThreshold: int
     emailAlerts: bool = True
     inAppNotifications: bool = True
+
+class FloodDetectionRequest(BaseModel):
+    latitude: float
+    longitude: float
+    locationName: str = None
+
+class FloodAlert(BaseModel):
+    userId: str
+    locationName: str
+    latitude: float
+    longitude: float
+    floodRisk: str
+    riskScore: float
+    waterLevel: float
+    precipitation: float
+    soilMoisture: float
+    drainageCapacity: float
+    timeToFlood: str
+    confidence: float
+    detectionMethod: str
+    detectedAt: datetime
+    status: str
