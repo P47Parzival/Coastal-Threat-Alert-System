@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { MapContainer, TileLayer, Marker, Popup, Circle, Polyline } from 'react-leaflet';
 import { Icon, DivIcon } from 'leaflet';
-import { Wind, Thermometer, AlertTriangle, MapPin, RefreshCw, Cloud } from 'lucide-react';
+import { Wind, Thermometer, AlertTriangle, MapPin, RefreshCw, Cloud, Droplets, Gauge } from 'lucide-react';
 import 'leaflet/dist/leaflet.css';
 
 interface WeatherData {
@@ -54,7 +54,9 @@ const WeatherMap: React.FC<WeatherMapProps> = ({
     temperature: true,
     wind: true,
     storms: true,
-    heat: false
+    heat: false,
+    precipitation: false,
+    pressure: false
   });
   const [mapCenter, setMapCenter] = useState<[number, number]>(center);
   const mapRef = useRef<any>(null);
@@ -63,10 +65,14 @@ const WeatherMap: React.FC<WeatherMapProps> = ({
   const API_KEY = import.meta.env.VITE_OPENWEATHER_API_KEY;
   const BASE_URL = 'https://api.openweathermap.org/data/2.5';
 
-  // Custom wind icon
+  // Custom wind icon - more authentic like news weather maps
   const createWindIcon = (speed: number, direction: number) => {
     const intensity = Math.min(speed / 50, 1); // Normalize wind speed
-    const color = intensity > 0.7 ? '#ff4444' : intensity > 0.4 ? '#ffaa00' : '#44aa44';
+    const color = intensity > 0.7 ? '#ff0000' : intensity > 0.5 ? '#ff6600' : intensity > 0.3 ? '#ffaa00' : '#00aa00';
+    
+    // Create wind barbs like professional weather maps
+    const barbCount = Math.floor(speed / 5); // 5 m/s per barb
+    const barbs = '|'.repeat(Math.min(barbCount, 8)); // Max 8 barbs
     
     return new DivIcon({
       className: 'wind-icon',
@@ -74,14 +80,19 @@ const WeatherMap: React.FC<WeatherMapProps> = ({
         <div style="
           transform: rotate(${direction}deg);
           color: ${color};
-          font-size: ${20 + intensity * 10}px;
-          text-shadow: 2px 2px 4px rgba(0,0,0,0.5);
+          font-size: 16px;
+          font-weight: bold;
+          text-shadow: 1px 1px 2px rgba(0,0,0,0.8);
+          background: rgba(255,255,255,0.9);
+          border-radius: 4px;
+          padding: 2px 4px;
+          border: 2px solid ${color};
         ">
-          💨
+          ${barbs}
         </div>
       `,
-      iconSize: [30, 30],
-      iconAnchor: [15, 15]
+      iconSize: [40, 40],
+      iconAnchor: [20, 20]
     });
   };
 
@@ -191,10 +202,22 @@ const WeatherMap: React.FC<WeatherMapProps> = ({
             return res.json();
           })
           .then(data => {
-            // Validate the response data
-            if (data && typeof data.lat === 'number' && typeof data.lon === 'number' && 
-                typeof data.temp === 'number' && typeof data.wind_speed === 'number') {
-              return { ...data, cityName: city.name };
+            // Validate the response data - OpenWeatherMap API structure
+            if (data && data.coord && typeof data.coord.lat === 'number' && typeof data.coord.lon === 'number' && 
+                data.main && typeof data.main.temp === 'number' && data.wind && typeof data.wind.speed === 'number') {
+              // Transform OpenWeatherMap API response to our expected format
+              return {
+                lat: data.coord.lat,
+                lon: data.coord.lon,
+                temp: data.main.temp,
+                feels_like: data.main.feels_like || data.main.temp,
+                humidity: data.main.humidity || 0,
+                wind_speed: data.wind.speed,
+                wind_deg: data.wind.deg || 0,
+                pressure: data.main.pressure || 1013,
+                weather: data.weather || [],
+                cityName: city.name
+              };
             } else {
               console.warn(`Invalid weather data for ${city.name}:`, data);
               return null;
@@ -223,32 +246,44 @@ const WeatherMap: React.FC<WeatherMapProps> = ({
     }
   };
 
-  // Fetch storm/cyclone data (simulated for demo)
+  // Fetch storm/cyclone data (enhanced simulation for authenticity)
   const fetchStormData = async () => {
     try {
-      // Simulated storm data - in real implementation, you'd use a storm tracking API
+      // Enhanced simulated storm data - more realistic positioning and movement
+      const currentTime = Date.now();
       const simulatedStorms: StormData[] = [
         {
           id: 'storm1',
           name: 'Cyclone Biparjoy',
-          lat: 20.5,
-          lon: 72.0,
-          wind_speed: 120,
-          pressure: 950,
+          lat: 20.5 + Math.sin(currentTime / 1000000) * 0.2, // Slight movement
+          lon: 72.0 + Math.cos(currentTime / 1000000) * 0.2,
+          wind_speed: 120 + Math.sin(currentTime / 500000) * 10, // Variable intensity
+          pressure: 950 + Math.sin(currentTime / 1000000) * 20,
           category: 'H3',
-          direction: 45,
-          timestamp: Date.now()
+          direction: 45 + Math.sin(currentTime / 2000000) * 5, // Slight direction change
+          timestamp: currentTime
         },
         {
           id: 'storm2',
           name: 'Depression ARB01',
-          lat: 15.2,
-          lon: 73.5,
-          wind_speed: 45,
-          pressure: 1005,
+          lat: 15.2 + Math.sin(currentTime / 800000) * 0.15,
+          lon: 73.5 + Math.cos(currentTime / 800000) * 0.15,
+          wind_speed: 45 + Math.sin(currentTime / 400000) * 8,
+          pressure: 1005 + Math.sin(currentTime / 800000) * 15,
           category: 'TS',
-          direction: 30,
-          timestamp: Date.now()
+          direction: 30 + Math.sin(currentTime / 1500000) * 3,
+          timestamp: currentTime
+        },
+        {
+          id: 'storm3',
+          name: 'Low Pressure Area',
+          lat: 18.8 + Math.sin(currentTime / 1200000) * 0.1,
+          lon: 75.2 + Math.cos(currentTime / 1200000) * 0.1,
+          wind_speed: 25 + Math.sin(currentTime / 600000) * 5,
+          pressure: 1010 + Math.sin(currentTime / 1200000) * 10,
+          category: 'TD',
+          direction: 60 + Math.sin(currentTime / 1800000) * 2,
+          timestamp: currentTime
         }
       ];
       
@@ -348,6 +383,28 @@ const WeatherMap: React.FC<WeatherMapProps> = ({
               <Thermometer className="w-4 h-4 text-red-600" />
               Heat Map
             </label>
+            
+            <label className="flex items-center gap-2 text-sm">
+              <input
+                type="checkbox"
+                checked={activeLayers.precipitation}
+                onChange={() => toggleLayer('precipitation')}
+                className="checkbox checkbox-sm"
+              />
+              <Droplets className="w-4 h-4 text-blue-600" />
+              Precipitation
+            </label>
+            
+            <label className="flex items-center gap-2 text-sm">
+              <input
+                type="checkbox"
+                checked={activeLayers.pressure}
+                onChange={() => toggleLayer('pressure')}
+                className="checkbox checkbox-sm"
+              />
+              <Gauge className="w-4 h-4 text-purple-600" />
+              Pressure
+            </label>
           </div>
         </div>
       )}
@@ -423,13 +480,30 @@ const WeatherMap: React.FC<WeatherMapProps> = ({
           attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
         />
 
-        {/* Weather Satellite Layer */}
+        {/* Weather Satellite Layers */}
         {API_KEY && (
-          <TileLayer
-            url={`https://tile.openweathermap.org/map/temp_new/{z}/{x}/{y}.png?appid=${API_KEY}`}
-            attribution='&copy; OpenWeatherMap'
-            opacity={activeLayers.heat ? 0.7 : 0}
-          />
+          <>
+            {/* Temperature Heat Map */}
+            <TileLayer
+              url={`https://tile.openweathermap.org/map/temp_new/{z}/{x}/{y}.png?appid=${API_KEY}`}
+              attribution='&copy; OpenWeatherMap'
+              opacity={activeLayers.heat ? 0.7 : 0}
+            />
+            
+            {/* Precipitation Layer */}
+            <TileLayer
+              url={`https://tile.openweathermap.org/map/precipitation_new/{z}/{x}/{y}.png?appid=${API_KEY}`}
+              attribution='&copy; OpenWeatherMap'
+              opacity={activeLayers.precipitation ? 0.6 : 0}
+            />
+            
+            {/* Pressure Layer */}
+            <TileLayer
+              url={`https://tile.openweathermap.org/map/pressure_new/{z}/{x}/{y}.png?appid=${API_KEY}`}
+              attribution='&copy; OpenWeatherMap'
+              opacity={activeLayers.pressure ? 0.6 : 0}
+            />
+          </>
         )}
 
         {/* Temperature Markers */}
@@ -522,12 +596,23 @@ const WeatherMap: React.FC<WeatherMapProps> = ({
           </Marker>
         ))}
 
-        {/* Wind Direction Lines */}
+        {/* Wind Direction Lines - Enhanced for authenticity */}
         {activeLayers.wind && !loading && weatherData.length > 0 && weatherData
           .filter(weather => weather && typeof weather.lat === 'number' && typeof weather.lon === 'number' && !isNaN(weather.lat) && !isNaN(weather.lon))
           .map((weather, index) => {
-          const endLat = weather.lat + (Math.sin(weather.wind_deg * Math.PI / 180) * 0.1);
-          const endLon = weather.lon + (Math.cos(weather.wind_deg * Math.PI / 180) * 0.1);
+          const windSpeed = weather.wind_speed;
+          const windDeg = weather.wind_deg;
+          
+          // Calculate wind direction line length based on speed
+          const lineLength = Math.min(windSpeed / 10, 0.15); // Longer lines for stronger winds
+          const endLat = weather.lat + (Math.sin(windDeg * Math.PI / 180) * lineLength);
+          const endLon = weather.lon + (Math.cos(windDeg * Math.PI / 180) * lineLength);
+          
+          // Color coding based on wind speed (like news weather maps)
+          let lineColor = '#00aa00'; // Light green for calm
+          if (windSpeed > 15) lineColor = '#ffaa00'; // Orange for moderate
+          if (windSpeed > 25) lineColor = '#ff6600'; // Dark orange for strong
+          if (windSpeed > 35) lineColor = '#ff0000'; // Red for very strong
           
           return (
             <Polyline
@@ -536,9 +621,9 @@ const WeatherMap: React.FC<WeatherMapProps> = ({
                 [weather.lat, weather.lon],
                 [endLat, endLon]
               ]}
-              color="#0066cc"
-              weight={Math.min(weather.wind_speed / 5, 8)}
-              opacity={0.7}
+              color={lineColor}
+              weight={Math.min(windSpeed / 3, 6)}
+              opacity={0.8}
             />
           );
         })}
@@ -571,29 +656,65 @@ const WeatherMap: React.FC<WeatherMapProps> = ({
         })}
       </MapContainer>
 
-      {/* Legend */}
-      <div className="absolute bottom-4 right-4 z-[1000] bg-white dark:bg-gray-800 rounded-lg shadow-lg p-3 text-sm">
-        <h4 className="font-bold mb-2">Legend</h4>
-        <div className="space-y-1">
-          <div className="flex items-center gap-2">
-            <div className="w-4 h-4 bg-red-500 rounded-full"></div>
-            <span>High Temp (&gt;30°C)</span>
+      {/* Enhanced Legend */}
+      <div className="absolute bottom-4 right-4 z-[1000] bg-white dark:bg-gray-800 rounded-lg shadow-lg p-3 text-sm max-w-48">
+        <h4 className="font-bold mb-2">Weather Legend</h4>
+        <div className="space-y-2">
+          {/* Temperature */}
+          <div className="border-b border-gray-200 pb-2">
+            <p className="font-semibold text-xs text-gray-600 mb-1">Temperature</p>
+            <div className="space-y-1">
+              <div className="flex items-center gap-2">
+                <div className="w-3 h-3 bg-red-500 rounded-full"></div>
+                <span className="text-xs">High (&gt;30°C)</span>
+              </div>
+              <div className="flex items-center gap-2">
+                <div className="w-3 h-3 bg-orange-500 rounded-full"></div>
+                <span className="text-xs">Medium (20-30°C)</span>
+              </div>
+              <div className="flex items-center gap-2">
+                <div className="w-3 h-3 bg-green-500 rounded-full"></div>
+                <span className="text-xs">Low (&lt;20°C)</span>
+              </div>
+            </div>
           </div>
-          <div className="flex items-center gap-2">
-            <div className="w-4 h-4 bg-orange-500 rounded-full"></div>
-            <span>Medium Temp (20-30°C)</span>
+          
+          {/* Wind */}
+          <div className="border-b border-gray-200 pb-2">
+            <p className="font-semibold text-xs text-gray-600 mb-1">Wind Speed</p>
+            <div className="space-y-1">
+              <div className="flex items-center gap-2">
+                <div className="w-3 h-3 bg-green-500 rounded-full"></div>
+                <span className="text-xs">Calm (&lt;15 m/s)</span>
+              </div>
+              <div className="flex items-center gap-2">
+                <div className="w-3 h-3 bg-orange-500 rounded-full"></div>
+                <span className="text-xs">Moderate (15-25 m/s)</span>
+              </div>
+              <div className="flex items-center gap-2">
+                <div className="w-3 h-3 bg-red-500 rounded-full"></div>
+                <span className="text-xs">Strong (&gt;25 m/s)</span>
+              </div>
+            </div>
           </div>
-          <div className="flex items-center gap-2">
-            <div className="w-4 h-4 bg-green-500 rounded-full"></div>
-            <span>Low Temp (&lt;20°C)</span>
-          </div>
-          <div className="flex items-center gap-2">
-            <span className="text-2xl">💨</span>
-            <span>Wind</span>
-          </div>
-          <div className="flex items-center gap-2">
-            <span className="text-2xl">🌪️</span>
-            <span>Storm/Cyclone</span>
+          
+          {/* Storms */}
+          <div>
+            <p className="font-semibold text-xs text-gray-600 mb-1">Storm Categories</p>
+            <div className="space-y-1">
+              <div className="flex items-center gap-2">
+                <span className="text-lg">🌪️</span>
+                <span className="text-xs">Cyclone/Hurricane</span>
+              </div>
+              <div className="flex items-center gap-2">
+                <span className="text-lg">💨</span>
+                <span className="text-xs">Tropical Storm</span>
+              </div>
+              <div className="flex items-center gap-2">
+                <span className="text-lg">☁️</span>
+                <span className="text-xs">Low Pressure</span>
+              </div>
+            </div>
           </div>
         </div>
       </div>
