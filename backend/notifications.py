@@ -4,7 +4,16 @@ load_dotenv()
 import os
 from sendgrid import SendGridAPIClient
 from sendgrid.helpers.mail import Mail
-from routes_aoi import generate_thumbnail 
+from routes_aoi import generate_thumbnail
+
+# Try to import config, fallback to direct env vars if not available
+try:
+    from config import SENDGRID_API_KEY, SENDER_EMAIL, EMAIL_ENABLED, EMAIL_FALLBACK
+except ImportError:
+    SENDGRID_API_KEY = os.environ.get('SENDGRID_API_KEY')
+    SENDER_EMAIL = os.environ.get('SENDER_EMAIL', 'dhruvmali999@gmail.com')
+    EMAIL_ENABLED = bool(SENDGRID_API_KEY)
+    EMAIL_FALLBACK = True 
 
 # Get your SendGrid API Key from your environment variables
 SENDGRID_API_KEY = os.environ.get('SENDGRID_API_KEY')
@@ -60,8 +69,13 @@ def send_flood_alert_email(user_email: str, location_name: str, flood_analysis: 
     """
     Send flood alert email to user
     """
-    if not SENDGRID_API_KEY:
-        print("ERROR: SendGrid API Key not configured. Cannot send flood alert email.")
+    if not EMAIL_ENABLED:
+        print("⚠️ Email notifications are disabled. SendGrid API Key not configured.")
+        if EMAIL_FALLBACK:
+            print(f"📧 FLOOD ALERT (Console Log): {user_email}")
+            print(f"   Location: {location_name}")
+            print(f"   Risk Level: {flood_analysis.get('floodRisk', 'UNKNOWN')}")
+            print(f"   Time to Flood: {flood_analysis.get('timeToFlood', 'Unknown')}")
         return
 
     # Determine alert level and urgency
@@ -166,3 +180,8 @@ def send_flood_alert_email(user_email: str, location_name: str, flood_analysis: 
         print(f"✅ Successfully sent flood alert email to {user_email}, Status: {response.status_code}")
     except Exception as e:
         print(f"❌ Error sending flood alert email: {e}")
+        if EMAIL_FALLBACK:
+            print(f"📧 FLOOD ALERT (Console Log): {user_email}")
+            print(f"   Location: {location_name}")
+            print(f"   Risk Level: {flood_analysis.get('floodRisk', 'UNKNOWN')}")
+            print(f"   Time to Flood: {flood_analysis.get('timeToFlood', 'Unknown')}")
