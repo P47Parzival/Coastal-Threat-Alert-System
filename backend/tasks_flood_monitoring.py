@@ -33,11 +33,20 @@ def monitor_all_users_for_flood():
                 user_location = get_user_location(user)
                 
                 if user_location:
-                    # Analyze flood risk for user's location
-                    flood_analysis = analyze_flood_risk_simple(
-                        user_location['latitude'], 
-                        user_location['longitude']
-                    )
+                    # Analyze flood risk for user's location using GEE
+                    try:
+                        from routes_flood import analyze_flood_risk_gee_simple
+                        flood_analysis = analyze_flood_risk_gee_simple(
+                            user_location['latitude'], 
+                            user_location['longitude']
+                        )
+                        print(f"🌍 GEE analysis completed for {user.get('email', 'Unknown')}")
+                    except Exception as gee_error:
+                        print(f"⚠️ GEE analysis failed, falling back to synthetic: {gee_error}")
+                        flood_analysis = analyze_flood_risk_simple(
+                            user_location['latitude'], 
+                            user_location['longitude']
+                        )
                     
                     # Check if flood risk is significant enough to create alert
                     if flood_analysis['floodRisk'] in ['HIGH', 'CRITICAL']:

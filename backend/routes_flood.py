@@ -90,8 +90,14 @@ async def detect_flood(
         latitude = request.latitude
         longitude = request.longitude
         location_name = request.locationName or f"Location ({latitude:.4f}, {longitude:.4f})"
+        accuracy = request.accuracy
+        timestamp = request.timestamp
         
         print(f"🔍 Starting flood detection for {location_name} at ({latitude}, {longitude})")
+        if accuracy:
+            print(f"📍 Location accuracy: {accuracy:.1f}m")
+        if timestamp:
+            print(f"⏰ Location timestamp: {datetime.fromtimestamp(timestamp/1000).isoformat()}")
         
         # Perform simplified flood detection
         flood_analysis = analyze_flood_risk_gee_simple(latitude, longitude)
@@ -102,6 +108,8 @@ async def detect_flood(
             "locationName": location_name,
             "latitude": latitude,
             "longitude": longitude,
+            "accuracy": accuracy,
+            "locationTimestamp": timestamp,
             "floodRisk": flood_analysis["floodRisk"],
             "riskScore": flood_analysis["riskScore"],
             "waterLevel": flood_analysis["waterLevel"],

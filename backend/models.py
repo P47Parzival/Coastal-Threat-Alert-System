@@ -53,7 +53,9 @@ class ShorelineAnalysisRequest(BaseModel):
 class FloodDetectionRequest(BaseModel):
     latitude: float
     longitude: float
-    locationName: str = None
+    locationName: Optional[str] = None
+    accuracy: Optional[float] = None
+    timestamp: Optional[int] = None
 
 class FloodAlert(BaseModel):
     userId: str
