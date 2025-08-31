@@ -24,6 +24,14 @@ A comprehensive AI-powered coastal monitoring and threat detection system that c
 - Automated 3-hour monitoring
 - Email alerts for high-risk areas
 
+### 🤖 **Overall Detection System (Clay v1.5 Integration)**
+- Advanced AI-powered coastal monitoring using Clay v1.5 foundation model
+- Real-time satellite data processing with Google Earth Engine
+- Multi-location analysis (Mumbai, Kerala, Chennai, Punjab, Bihar, Uttarakhand)
+- 768-dimensional embeddings for accurate threat detection
+- Progressive scaling (10m-1000m resolution) for comprehensive coverage
+- Production-ready API with robust error handling
+
 ## 🏗️ System Architecture
 
 ### **Backend (FastAPI + Python)**
@@ -31,6 +39,7 @@ A comprehensive AI-powered coastal monitoring and threat detection system that c
 - MongoDB for data storage
 - Celery for background tasks
 - Google Earth Engine integration
+- Clay v1.5 foundation model for AI analysis
 - Redis for task queuing
 
 ### **Frontend (React + TypeScript)**
@@ -58,9 +67,12 @@ A comprehensive AI-powered coastal monitoring and threat detection system that c
 *Coastal area after change detection with highlighted modifications*
 
 ## 🔮 Future Implementations
-- Custom DL pipline for anomaly and algal blooms.
-- Current cutom pipeline for Shoreline detection and monitoring which can be viewed at ./Models/fetch_noaa_data.py and test_flood_detection. 
- Data API From https://www.noaa.gov/ocean-coasts
+- Custom DL pipeline for anomaly and algal blooms detection
+- Enhanced Clay v1.5 model fine-tuning for coastal-specific features
+- Multi-temporal analysis for long-term coastal change trends
+- Advanced early warning system with predictive modeling
+- Current custom pipeline for Shoreline detection and monitoring which can be viewed at ./Models/fetch_noaa_data.py and test_flood_detection
+- Data API From https://www.noaa.gov/ocean-coasts
 
 
 ## 🚀 Quick Start
@@ -92,7 +104,7 @@ npm run dev
 ### **Required API Keys**
 - OpenWeatherMap: Weather data and maps
 - SendGrid: Email notifications
-- Google Earth Engine: Satellite imagery
+- Google Earth Engine: Satellite imagery and Clay v1.5 model access
 - MongoDB: Database connection
 
 ## 📊 API Endpoints
@@ -101,6 +113,7 @@ npm run dev
 - **AOI Management**: `/aois/` (CRUD operations)
 - **Shoreline Analysis**: `/shoreline/analyze`
 - **Flood Detection**: `/flood/detect`
+- **Overall Detection**: `/monitor/robust` (Clay v1.5 AI analysis)
 
 ## 🎯 Use Cases
 
@@ -119,6 +132,8 @@ npm run dev
 - ✅ Core AOI monitoring system
 - ✅ Weather integration and mapping
 - ✅ Flood detection and alerts
+- ✅ Overall Detection with Clay v1.5 AI model
+- ✅ Google Earth Engine real-time integration
 - 🚧 Advanced AI model training
 - 📋 Production deployment
 

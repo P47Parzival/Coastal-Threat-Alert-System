@@ -8,7 +8,8 @@ import {
   LogOut, 
   Menu,
   X,
-  Satellite
+  Satellite,
+  GlobeIcon
 } from 'lucide-react';
 import { useAuth } from '../contexts/AuthContext';
 import { useTheme } from '../contexts/ThemeContext';
@@ -28,6 +29,7 @@ export default function Layout({ children }: LayoutProps) {
     { name: 'My AOIs', href: '/aois', icon: MapPin },
     { name: 'New AOI', href: '/create-aoi', icon: Plus },
     { name: 'Shoreline Monitoring', href: '/shoreline-monitoring', icon: Settings },
+    { name: 'Overall Detection', href: '/overall-detection', icon: GlobeIcon },
     { name: 'Settings', href: '/settings', icon: Settings },
   ];
 

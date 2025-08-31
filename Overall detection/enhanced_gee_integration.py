@@ -112,6 +112,36 @@ class EnhancedGEEManager:
                 "geometry": ee.Geometry.Rectangle([151.0, -34.0, 151.5, -33.6]),
                 "center": [151.25, -33.8],
                 "name": "Sydney Harbour"
+            },
+            "uttarakhand": {
+                "geometry": ee.Geometry.Rectangle([78.0, 29.0, 81.0, 31.5]),
+                "center": [79.5, 30.25],
+                "name": "Uttarakhand Region"
+            },
+            "uttarakhand, india": {
+                "geometry": ee.Geometry.Rectangle([78.0, 29.0, 81.0, 31.5]),
+                "center": [79.5, 30.25],
+                "name": "Uttarakhand Region"
+            },
+            "bihar": {
+                "geometry": ee.Geometry.Rectangle([83.5, 24.0, 88.5, 27.5]),
+                "center": [86.0, 25.75],
+                "name": "Bihar Region"
+            },
+            "bihar, india": {
+                "geometry": ee.Geometry.Rectangle([83.5, 24.0, 88.5, 27.5]),
+                "center": [86.0, 25.75],
+                "name": "Bihar Region"
+            },
+            "punjab": {
+                "geometry": ee.Geometry.Rectangle([73.5, 29.5, 76.8, 32.8]),
+                "center": [75.15, 31.15],
+                "name": "Punjab Region"
+            },
+            "punjab, india": {
+                "geometry": ee.Geometry.Rectangle([73.5, 29.5, 76.8, 32.8]),
+                "center": [75.15, 31.15],
+                "name": "Punjab Region"
             }
         }
         
@@ -248,20 +278,20 @@ class EnhancedGEEManager:
         }
     
     def _analyze_coastal_threats(self, band_stats: Dict, ndvi: float, cloud_cover: float) -> List[Dict]:
-        """Analyze satellite data for coastal threats"""
+        """Analyze satellite data for environmental threats (coastal and inland)"""
         threats = []
         
-        # Vegetation loss detection
+        # Vegetation loss detection (applicable to all regions)
         if ndvi < 0.3:
             threats.append({
                 "type": "vegetation_loss",
                 "severity": "high" if ndvi < 0.2 else "medium",
                 "confidence": 0.85,
                 "description": f"Low vegetation index detected (NDVI: {ndvi:.3f})",
-                "recommendation": "Monitor mangrove and coastal vegetation health"
+                "recommendation": "Monitor vegetation health and implement conservation measures"
             })
         
-        # Water turbidity (using red band reflectance)
+        # Water quality/turbidity (for coastal and river regions)
         red_reflectance = band_stats.get('B4', 0)
         if red_reflectance > 2000:  # High red reflectance may indicate turbidity
             threats.append({
@@ -272,15 +302,25 @@ class EnhancedGEEManager:
                 "recommendation": "Monitor water quality and pollution sources"
             })
         
-        # Erosion indicators (using NIR/Red ratio)
+        # Erosion/soil degradation indicators
         nir_reflectance = band_stats.get('B8', 0)
         if red_reflectance > 0 and (nir_reflectance / red_reflectance) < 0.5:
             threats.append({
-                "type": "erosion_risk",
+                "type": "soil_degradation",
                 "severity": "medium",
                 "confidence": 0.70,
-                "description": "Potential coastal erosion indicators detected",
-                "recommendation": "Deploy coastal protection measures"
+                "description": "Potential soil degradation or erosion indicators detected",
+                "recommendation": "Implement soil conservation measures"
+            })
+        
+        # Agricultural stress detection (high red, low NIR)
+        if red_reflectance > 1500 and nir_reflectance < 2000:
+            threats.append({
+                "type": "agricultural_stress",
+                "severity": "medium",
+                "confidence": 0.68,
+                "description": "Agricultural stress patterns detected",
+                "recommendation": "Monitor crop health and irrigation systems"
             })
         
         return threats
@@ -321,6 +361,63 @@ class EnhancedGEEManager:
                     "confidence": 0.85,
                     "description": "Gradual sea level rise detected",
                     "recommendation": "Upgrade coastal infrastructure"
+                })
+        
+        # Uttarakhand-specific threats (mountain region)
+        elif "uttarakhand" in location_lower:
+            if random.random() > 0.5:  # 50% chance
+                threats.append({
+                    "type": "landslide_risk",
+                    "severity": "high",
+                    "confidence": 0.80,
+                    "description": "Himalayan slope instability detected",
+                    "recommendation": "Monitor hill slopes and implement early warning systems"
+                })
+            if random.random() > 0.7:  # 30% chance
+                threats.append({
+                    "type": "flash_flood_risk",
+                    "severity": "medium",
+                    "confidence": 0.75,
+                    "description": "River valley flood risk identified",
+                    "recommendation": "Install flood monitoring systems in river valleys"
+                })
+        
+        # Bihar-specific threats (flood-prone plains)
+        elif "bihar" in location_lower:
+            if random.random() > 0.4:  # 60% chance
+                threats.append({
+                    "type": "river_flooding",
+                    "severity": "high",
+                    "confidence": 0.88,
+                    "description": "Ganga river system flood risk detected",
+                    "recommendation": "Strengthen embankments and flood control measures"
+                })
+            if random.random() > 0.6:  # 40% chance
+                threats.append({
+                    "type": "waterlogging",
+                    "severity": "medium",
+                    "confidence": 0.72,
+                    "description": "Poor drainage system identified",
+                    "recommendation": "Improve drainage infrastructure"
+                })
+        
+        # Punjab-specific threats (agricultural region)
+        elif "punjab" in location_lower:
+            if random.random() > 0.5:  # 50% chance
+                threats.append({
+                    "type": "groundwater_depletion",
+                    "severity": "high",
+                    "confidence": 0.85,
+                    "description": "Rapid groundwater level decline detected",
+                    "recommendation": "Implement water conservation measures"
+                })
+            if random.random() > 0.7:  # 30% chance
+                threats.append({
+                    "type": "agricultural_stress",
+                    "severity": "medium",
+                    "confidence": 0.78,
+                    "description": "Crop stress patterns identified",
+                    "recommendation": "Monitor crop health and irrigation systems"
                 })
         
         # Generate realistic satellite parameters

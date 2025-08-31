@@ -8,6 +8,7 @@ import Dashboard from './pages/Dashboard';
 import AOIList from './pages/AOIList';
 import CreateAOI from './pages/CreateAOI';
 import ShorelineMonitoring from './pages/ShorelineMonitoring';
+import OverallDetection from './pages/Overalldetection';
 import Layout from './components/Layout';
 import { ThemeProvider } from './contexts/ThemeContext';
 import Settings from './pages/Settings';
@@ -71,6 +72,11 @@ function App() {
               <Route path="/shoreline-monitoring" element={
                 <ProtectedRoute>
                   <ShorelineMonitoring />
+                </ProtectedRoute>
+              } />
+              <Route path="/overall-detection" element={
+                <ProtectedRoute>
+                  <OverallDetection />
                 </ProtectedRoute>
               } />
               <Route path="/settings" element={
