@@ -3,6 +3,7 @@
 A comprehensive AI-powered coastal monitoring and threat detection system that combines satellite imagery analysis, real-time weather monitoring, and flood risk assessment to protect coastal communities.
 
 ![Coastal Monitoring](image1.png)
+![Detect flood](pipeline.jpg)
 
 ## 🚀 Features
 
@@ -52,7 +53,7 @@ A comprehensive AI-powered coastal monitoring and threat detection system that c
 ## 📸 System Screenshots
 ### **Flood Alert Email**
 ![notification](notification.jpg)
-*Coastal area before change detection analysis*
+*Flood Prediction*
 
 ### **HeatMap**
 ![heatmap](heatmap.png)
@@ -60,7 +61,7 @@ A comprehensive AI-powered coastal monitoring and threat detection system that c
 
 ### **Before Analysis - Coastal Area**
 ![Before Analysis](image_before.png)
-*Flood Prediction*
+*Coastal area before change detection analysis*
 
 ### **After Analysis - Detected Changes**
 ![After Analysis](image_after.png)
