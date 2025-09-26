@@ -28,7 +28,7 @@ A comprehensive AI-powered coastal monitoring and threat detection system that c
 ### 🤖 **Overall Detection System (Clay v1.5 Integration)**
 - Advanced AI-powered coastal monitoring using Clay v1.5 foundation model
 - Real-time satellite data processing with Google Earth Engine
-- Multi-location analysis (Mumbai, Kerala, Chennai, Punjab, Bihar, Uttarakhand)
+- Multi-locations analysis (Mumbai, Kerala, Chennai, Punjab, Bihar, Uttarakhand)
 - 768-dimensional embeddings for accurate threat detection
 - Progressive scaling (10m-1000m resolution) for comprehensive coverage
 - Production-ready API with robust error handling
